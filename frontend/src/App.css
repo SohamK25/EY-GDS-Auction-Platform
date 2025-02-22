@@ -1,0 +1,16 @@
+/* Light Theme */
+:root {
+    --bg-color: #042343f2;
+
+    --text-color: #000000;
+  }
+  
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
