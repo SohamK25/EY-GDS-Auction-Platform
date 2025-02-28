@@ -37,8 +37,7 @@ const Navbar = () => {
                 <Link to="/contactus" style={{
                     padding: "6px 12px",
                     color: active === "contact" ? "white" : "#007bff",
-                    // backgroundColor: active === "contact" ? "#007bff" : "transparent",
-                    color: "#007bff",
+                    // color: "#007bff",
                     textDecoration: "none",
                     marginRight: "8px",
                     transition: "0.3s ease-in-out"
