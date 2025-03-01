@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const auctionItemSchema = new mongoose.Schema({
     itemName: String,
     description: String,
-    currentBide: Number,
+    currentBid: Number,
     highestBidder: String,
     closingTime: Date, 
     isClosed: {type: Boolean, default: false}
