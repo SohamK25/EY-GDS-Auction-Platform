@@ -1,16 +1,16 @@
 import express from 'express';
-import { auction, auctions, bidOnItem } from '../controller/auction.controller';
+import { auction, auctionItem, auctions, bidOnItem } from '../controller/auction.controller';
 import authenticate from '../middleware/authentication';
 
 
 const router = express.Router();
 
-router.post('/auction', auction);
+router.post('/auction', authenticate, auction);
 
 router.get('/auctions', auctions);
 
-router.get('/auctions/:id', auctions);
+router.get('/auctions/:id', auctionItem);
 
-router.post('/bid/:id', bidOnItem, authenticate)
+router.post('/bid/:id', authenticate, bidOnItem)
 
 export default router;

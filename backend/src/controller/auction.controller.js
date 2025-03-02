@@ -44,32 +44,38 @@ export const auctionItem = async (req, res) => {
     }
 };
 
-export const bidOnItem = async(req, res) => {
+export const bidOnItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const { bid } = req.body; 
-        const item = await AuctionItem.findById(id);
-
-        if(!item) return res.status(400).json({message: "Item not found"});
-        if(item.isClosed) return res.status(400).json({message: "Auction is closed"});
-
-        if(new Date() > new Date(item.closingTime)){
-            item.isClosed = true;
-            await item.save();
-            return res.json({message: "Auction is closed.", winner: item.highestBidder})
+        const { bid } = req.body;
+        
+        if (!req.user || !req.user.username) {
+            return res.status(401).json({ message: "Unauthorized: User not authenticated" });
         }
 
-        if(bid> item.currentBid){
+        const item = await AuctionItem.findById(id);
+
+        if (!item) return res.status(400).json({ message: "Item not found" });
+        if (item.isClosed) return res.status(400).json({ message: "Auction is closed" });
+
+        if (new Date() > new Date(item.closingTime)) {
+            item.isClosed = true;
+            await item.save();
+            return res.json({ message: "Auction is closed.", winner: item.highestBidder });
+        }
+
+        if (bid > item.currentBid) {
             item.currentBid = bid;
             item.highestBidder = req.user.username;
             await item.save();
-            res.json({message: "Bid Successful", item})
-        }else {
-            return res.status(400).json({message: "Bid is too low"})
+            return res.json({ message: "Bid Successful", item });
+        } else {
+            return res.status(400).json({ message: "Bid is too low" });
         }
 
     } catch (error) {
         console.log("Error in bidding on item", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
-} 
+};
+
