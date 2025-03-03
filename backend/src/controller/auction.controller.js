@@ -79,3 +79,55 @@ export const bidOnItem = async (req, res) => {
     }
 };
 
+export const editAuction = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { itemName, description, startingBid, closingTime } = req.body;
+
+        if (!req.user || !req.user.username) {
+            return res.status(401).json({ message: "Unauthorized: User not authenticated" });
+        }
+
+        const item = await AuctionItem.findById(id);
+        if (!item) return res.status(404).json({ message: "Auction item not found" });
+
+        if (item.createdBy !== req.user.username) {
+            return res.status(403).json({ message: "Unauthorized: You can only edit your own auctions" });
+        }
+
+        item.itemName = itemName || item.itemName;
+        item.description = description || item.description;
+        item.startingBid = startingBid || item.startingBid;
+        item.closingTime = closingTime || item.closingTime;
+
+        await item.save();
+        return res.json({ message: "Auction item updated successfully", item });
+    } catch (error) {
+        console.log("Error in editing auction item", error.message);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+export const deleteAuction = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!req.user || !req.user.username) {
+            return res.status(401).json({ message: "Unauthorized: User not authenticated" });
+        }
+
+        const item = await AuctionItem.findById(id);
+        if (!item) return res.status(404).json({ message: "Auction item not found" });
+
+        if (item.createdBy !== req.user.username) {
+            return res.status(403).json({ message: "Unauthorized: You can only delete your own auctions" });
+        }
+
+        await AuctionItem.findByIdAndDelete(id);
+        return res.json({ message: "Auction item deleted successfully" });
+    } catch (error) {
+        console.log("Error in deleting auction item", error.message);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};

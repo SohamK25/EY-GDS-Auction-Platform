@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import authRoute from './src/routes/auth.routes.js'
+import authRoute from './src/routes/auth.routes.js';
+import auctionRoute from './src/routes/auction.routes.js';
 import {connectDB} from './src/lib/db.js';
 // const mongoose  = require("mongoose");
 
@@ -13,6 +14,7 @@ app.use(cors());
 
 connectDB();
 app.use('/api/auth', authRoute)
+app.use('/api/auct', auctionRoute)
 
 const PORT = process.env.PORT;
 
