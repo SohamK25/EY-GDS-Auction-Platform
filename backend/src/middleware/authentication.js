@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 
 const authenticate = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
     if (!token) {
         return res.status(401).json({ message: "Unauthorized: No token provided" });
@@ -13,7 +14,7 @@ const authenticate = (req, res, next) => {
             return res.status(401).json({message:"Invalid token"});
         }
 
-        req.user = user;
+        req.user = decoded;
         next();
     });
 };

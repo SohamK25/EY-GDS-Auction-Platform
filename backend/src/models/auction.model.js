@@ -6,6 +6,7 @@ const auctionItemSchema = new mongoose.Schema({
     currentBid: Number,
     highestBidder: String,
     closingTime: Date, 
+    createdBy:String,
     isClosed: {type: Boolean, default: false}
 });
 

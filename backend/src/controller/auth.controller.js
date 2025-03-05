@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs'
 
 export const signup = async (req, res) => {
-    // console.log(req.body);
+    console.log(req.body);
     const { username, email, password } = req.body;
     try {
         if (!username || !email || !password) {
@@ -33,7 +33,7 @@ export const signup = async (req, res) => {
         } else {
             return res.staus(400).json({ message: "Inavalid user data" })
         }
-
+    
     } catch (error) {
         console.log("Error in signup", error.message);
         res.status(500).json({ message: "Internal server error" });
@@ -48,7 +48,7 @@ export const signin = async (req, res) => {
             return res.status(400).json({ message: "Please enter all the details" });
         }
         if (user) {
-            const token = jwt.sign({ userId: user._id, email }, process.env.SECRET_KEY, { expiresIn: '1h' });
+            const token = jwt.sign( { userId: user._id, email: user.email, username: user.username }, process.env.SECRET_KEY, { expiresIn: '1h' });
             return res.status(201).json({ message: "Signin Successful", token })
         } else {
             return res.status(400).json({ message: "Invalid credentials" });
@@ -56,5 +56,14 @@ export const signin = async (req, res) => {
     } catch (error) {
         console.log("Error in signup", error.message);
         res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const checkAuth = (req, res) => {
+    try{
+        res.status(200).json(req.user)
+    }catch(error){
+        console.log("Error in chekAuth Controller", error.message);
+        res.status(500).json({message: "Internal server error"});
     }
 }

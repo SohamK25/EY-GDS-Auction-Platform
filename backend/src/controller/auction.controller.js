@@ -1,26 +1,34 @@
 import AuctionItem from '../models/auction.model.js';
 
 export const auction = async (req, res) => {
-    try{
-        const {itemName, description, startingBid, closingTime} = req.body;
-        if (!itemName || !description || !startingBid || !closingTime){
-            return res.status(400).json({message: "Please enter all the details"});
+    try {
+        const { itemName, description, startingBid, closingTime } = req.body;
+
+        if (!req.user || !req.user.username) {
+            return res.status(401).json({ message: "Unauthorized: User not authenticated" });
         }
 
-        const newItem = new AuctionItem({
-            itemName,
-            description,
-            currentBid: startingBid,
-            highestBidder: '',
-            closingTime,
-        });
+        if (!itemName || !description || !startingBid || !closingTime) {
+            return res.status(400).json({ message: "Please enter all the details" });
+        } else {
 
-        await newItem.save();
-        return res.status(201).json({message: "Auction Item Created", item: newItem});
-    }catch (error) {
+            const newItem = new AuctionItem({
+                itemName,
+                description,
+                currentBid: startingBid,
+                highestBidder: '',
+                closingTime,
+                createdBy: req.user.username,
+            });
+
+            await newItem.save();
+            return res.status(201).json({ message: "Auction Item Created", item: newItem });
+        }
+    } catch (error) {
         console.log("Error in creating auction item", error.message);
         res.status(500).json({ message: "Internal server error" });
-    }};
+    }
+};
 
 export const auctions = async (req, res) => {
     try {
@@ -35,7 +43,7 @@ export const auctions = async (req, res) => {
 export const auctionItem = async (req, res) => {
     try {
         const auctionItem = await AuctionItem.findById(req.params.id);
-        if(!auctionItem) return res.status(400).json({message: "Item not found"});
+        if (!auctionItem) return res.status(400).json({ message: "Item not found" });
 
         res.json(auctionItem);
     } catch (error) {
@@ -48,8 +56,8 @@ export const bidOnItem = async (req, res) => {
     try {
         const { id } = req.params;
         const { bid } = req.body;
-        
-        if (!req.user || !req.user.username) {
+
+        if (!req.user || !req.user.email) {
             return res.status(401).json({ message: "Unauthorized: User not authenticated" });
         }
 
@@ -67,8 +75,11 @@ export const bidOnItem = async (req, res) => {
         if (bid > item.currentBid) {
             item.currentBid = bid;
             item.highestBidder = req.user.username;
+            console.log("User making bid:", req.user);
+
             await item.save();
             return res.json({ message: "Bid Successful", item });
+
         } else {
             return res.status(400).json({ message: "Bid is too low" });
         }
@@ -84,11 +95,15 @@ export const editAuction = async (req, res) => {
         const { id } = req.params;
         const { itemName, description, startingBid, closingTime } = req.body;
 
+        console.log("Authenticated User:", req.user);
+
+
         if (!req.user || !req.user.username) {
             return res.status(401).json({ message: "Unauthorized: User not authenticated" });
         }
 
-        const item = await AuctionItem.findById(id);
+        let item = await AuctionItem.findById(id);
+        // console.log("Auction Item Created By:", item.createdBy);
         if (!item) return res.status(404).json({ message: "Auction item not found" });
 
         if (item.createdBy !== req.user.username) {

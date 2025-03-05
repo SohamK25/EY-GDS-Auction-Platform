@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-// import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { LogOut, Gavel, MessageSquare, User } from "lucide-react";
 import { useState } from "react";
 
 const Navbar = () => {
-    //   const { logout, authUser } = useAuthStore();
+    const { logout, authUser } = useAuthStore();
     const { active, setActive } = useState();
     return (
         <nav style={{
@@ -52,7 +52,7 @@ const Navbar = () => {
                 <Link to="/login" style={{
                     padding: "6px 12px",
                     color: active === "login" ? "white" : "#007bff",
-                    // backgroundColor: active === "login" ? "#007bff" : "transparent",
+                    backgroundColor: active === "login" ? "#007bff" : "transparent",
                     textDecoration: "none",
                     transition: "0.3s ease-in-out",
                     marginRight: "8px"

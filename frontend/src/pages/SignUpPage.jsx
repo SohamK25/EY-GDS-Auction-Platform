@@ -1,16 +1,34 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle, Lock, Loader2, Zap } from "lucide-react";
+import { useAuthStore } from '../store/useAuthStore.js';
+import toast from "react-hot-toast";
 
 const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ username: "", email: "", password: "" });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => setLoading(false), 2000); // Simulating API request
+  const { signup, isSigningUp } = useAuthStore();
+
+  const validateForm = () => {
+    if (!formData.username.trim()) return toast.error("Full name is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
+    if (!formData.password) return toast.error("Password is required");
+    if (formData.password.length < 6) return toast.error("Password must be at least 6 characters");
+
+    return true;
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const success = validateForm();
+
+    if (success === true) signup(formData);
+  };
+
+// form validation and useAuthstore implementation is remaining
 
   return (
     <div
@@ -91,8 +109,8 @@ const SignUpPage = () => {
                     color: "#0d1117",
                     fontSize: "14px",
                   }}
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 />
               </div>
             </div>
@@ -160,7 +178,7 @@ const SignUpPage = () => {
                 justifyContent: "center",
                 marginTop: "30px"
               }}
-              disabled={loading}
+              disabled={isSigningUp}
             >
               {loading ? (
                 <>

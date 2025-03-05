@@ -13,9 +13,9 @@ router.get('/auctions/:id', auctionItem);
 
 router.post('/bid/:id', authenticate, bidOnItem);
 
-router.put('/auction/:id', authenticate, editAuction);
+router.put('/eauction/:id', authenticate, editAuction);
 
-router.delete('/auction/:id', authenticate, deleteAuction);
+router.delete('/dauction/:id', authenticate, deleteAuction);
 
 export default router;
 
