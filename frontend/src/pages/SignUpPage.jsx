@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle, Lock, Loader2, Zap } from "lucide-react";
+import { CheckCircle, Lock, Loader2, Zap, Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from '../store/useAuthStore.js';
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ username: "", email: "", password: "" });
 
@@ -141,10 +142,9 @@ const SignUpPage = () => {
 
             <div style={{ marginBottom: "15px" }}>
               <label style={{ fontWeight: "bold", fontSize: "14px" }}>Password</label>
-              <div style={{ position: "relative" }}>
-                
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   style={{
                     width: "90%",
@@ -158,6 +158,23 @@ const SignUpPage = () => {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "10px",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                  }}
+                >
+                  {showPassword ?
+                    <EyeOff size={18} style={{ marginRight: "10px", color: "gray" }} /> :
+                    <Eye size={18} style={{ marginRight: "10px", color: "black" }} />
+                  }
+                </button>
               </div>
             </div>
 

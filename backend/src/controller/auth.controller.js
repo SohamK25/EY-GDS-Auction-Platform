@@ -47,17 +47,59 @@ export const signin = async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ message: "Please enter all the details" });
         }
-        if (user) {
-            const token = jwt.sign( { userId: user._id, email: user.email, username: user.username }, process.env.SECRET_KEY, { expiresIn: '1h' });
-            return res.status(201).json({ message: "Signin Successful", token })
-        } else {
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
+
+        const token = jwt.sign(
+            { userId: user._id, email: user.email, username: user.username },
+            process.env.SECRET_KEY,
+            { expiresIn: "1h" }
+        );
+
+        res.cookie("jwt", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "development", 
+            sameSite: "strict",
+            maxAge: 60 * 60 * 1000, // 1 hour
+        });
+
+        // console.log(token)
+        return res.status(200).json({ message: "Signin Successful", token,
+            user: { _id: user._id, email: user.email, username: user.username }
+         });
     } catch (error) {
-        console.log("Error in signup", error.message);
+        console.error("Error in signin:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
-}
+};
+
+// export const logout = (req, res) => {
+//     try {
+//         res.cookie("jwt", "", {
+//             httpOnly: true,
+//             secure: process.env.NODE_ENV === "development", 
+//             sameSite: "strict",
+//             expires: new Date(0), 
+//         });
+//         return res.status(200).json({ message: "Logged Out Successfully" });
+//     } catch (error) {
+//         console.error("Error in Logging Out:", error.message);
+//         res.status(500).json({ message: "Internal server error" });
+//     }
+// };
+
+export const logout = (req, res) => {
+    try {
+        res.cookie("jwt", "", {maxAge:0})
+        return res.status(200).json({message: "Logged Out Successfully"})
+    } catch (error) {
+        console.log("Error in Signing Out", error.message)
+        res.status(500).json({message: "Internal server error"});
+    }
+}; 
+
 
 export const checkAuth = (req, res) => {
     try{

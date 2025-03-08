@@ -9,7 +9,7 @@ const ContactUsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => setLoading(false), 2000); // Simulating API request
+    setTimeout(() => setLoading(false), 2000); 
   };
 
   return (

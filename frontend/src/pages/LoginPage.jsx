@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle, Lock, Loader2, Zap } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { CheckCircle, Lock, Loader2, Zap, Eye, EyeOff } from "lucide-react";
 
 const LoginPage = () => {
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const { login, isLoggingIn } = useAuthStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => setLoading(false), 2000); // Simulating API request
+    login(formData);
   };
 
   return (
@@ -77,7 +81,7 @@ const LoginPage = () => {
             <div style={{ marginBottom: "15px" }}>
               <label style={{ fontWeight: "bold", fontSize: "14px" }}>Email Address</label>
               <div style={{ position: "relative" }}>
-                
+
                 <input
                   type="email"
                   placeholder="you@example.com"
@@ -98,10 +102,9 @@ const LoginPage = () => {
 
             <div style={{ marginBottom: "15px" }}>
               <label style={{ fontWeight: "bold", fontSize: "14px" }}>Password</label>
-              <div style={{ position: "relative" }}>
-              
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   style={{
                     width: "90%",
@@ -115,8 +118,26 @@ const LoginPage = () => {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "10px",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                  }}
+                >
+                  {showPassword ?
+                    <EyeOff size={18} style={{ marginRight: "10px", color: "gray" }} /> :
+                    <Eye size={18} style={{ marginRight: "10px", color: "black" }} />
+                  }
+                </button>
               </div>
             </div>
+
 
 
             <button
@@ -135,9 +156,9 @@ const LoginPage = () => {
                 justifyContent: "center",
                 marginTop: "50px"
               }}
-              disabled={loading}
+              disabled={isLoggingIn}
             >
-              {loading ? (
+              {isLoggingIn ? (
                 <>
                   <Loader2 size={18} className="animate-spin" style={{ marginRight: "10px" }} />
                   Loading...

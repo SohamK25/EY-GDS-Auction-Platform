@@ -1,22 +1,36 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 
-const authenticate = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+const authenticate = async (req, res, next) => {
+    try {
+        const token = req.cookies.jwt;
 
-    if (!token) {
-        return res.status(401).json({ message: "Unauthorized: No token provided" });
-    }
-
-    jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
-        if (err) {
-            return res.status(401).json({message:"Invalid token"});
+        if (!token) {
+            console.log("No token found in cookies");
+            return res.status(401).json({ message: "Unauthorized - No token Provided" })
         }
 
-        req.user = decoded;
+        const decoded = jwt.verify(token, process.env.SECRET_KEY)
+
+        if (!decoded) {
+            return res.status(401).json({ message: "Unauthorized - Token Invalid" })
+        }
+
+
+        const user = await User.findById(decoded.userId).select("-password");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        req.user = user;
+
         next();
-    });
-};
+
+    } catch (error) {
+        console.log("Error in middleware", error.message)
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
 
 export default authenticate;
