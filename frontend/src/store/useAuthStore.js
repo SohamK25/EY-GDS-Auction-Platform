@@ -54,7 +54,7 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: null });
       toast.success("Logged out successfully");
       setTimeout(() => {
-        window.location.href = "/";
+        window.location.href = "/login";
       }, 500);
     } catch (error) {
       toast.error("Logout failed");

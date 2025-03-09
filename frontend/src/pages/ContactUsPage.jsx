@@ -25,8 +25,7 @@ const ContactUsPage = () => {
           // backgroundColor: "#0d1117",
           // paddingLeft: "20px",
           marginLeft: "25px",
-          marginTop: "30px",
-          overflow: "auto"
+          marginTop: "60px"
         }}
       >
         <div

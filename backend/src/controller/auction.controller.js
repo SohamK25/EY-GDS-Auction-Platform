@@ -5,7 +5,8 @@ import upload from "../middleware/multer.js";
 export const auction = async (req, res) => {
     try {
         const { itemName, description, startingBid, startingTime, closingTime } = req.body;
-        const picture = req.file ? req.file.path : ""; // Get image URL from Cloudinary
+        const picture = req.file ? req.file.path : ""; 
+        
 
         if (!req.user || !req.user.username) {
             return res.status(401).json({ message: "Unauthorized: User not authenticated" });
@@ -18,7 +19,7 @@ export const auction = async (req, res) => {
         const newItem = new AuctionItem({
             itemName,
             description,
-            currentBid: startingBid, // Ensure this is the correct field
+            currentBid: startingBid,
             highestBidder: "",
             startingTime,
             closingTime,

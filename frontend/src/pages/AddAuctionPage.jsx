@@ -1,31 +1,70 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
-import { Upload } from 'lucide-react';
+import { Upload, Loader2 } from "lucide-react";
+import { useAuctionStore } from "../store/useAuctionStore";
 
 const AddAuctionPage = () => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [itemName, setItemName] = useState("");
-  const [description, setDescription] = useState("");
-  const [startingPrice, setStartingPrice] = useState("");
-  const [images, setImages] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null); 
 
-  const handleFileChange = (event) => {
-    setImages(event.target.files);
+  const [formData, setFormData] = useState({
+    itemName: "",
+    description: "",
+    startingBid: "",
+    startingTime: new Date(),
+    closingTime: new Date(),  
+    picture: null,
+  });
+
+  const { createAuction, isCreating } = useAuctionStore();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleStartDateChange = (date) => {
+    setFormData((prev) => ({ ...prev, startingTime: date || new Date() })); 
+  };
+
+  const handleEndDateChange = (date) => {
+    setFormData((prev) => ({ ...prev, closingTime: date || new Date() })); 
+  };
+
+  const handleFileChange = (e) => {
+    setFormData((prev) => ({ ...prev, picture: e.target.files[0] }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      itemName,
-      description,
-      startingPrice,
-      startDate: startDate ? format(startDate, "yyyy-MM-dd HH:mm") : "",
-      endDate: endDate ? format(endDate, "yyyy-MM-dd HH:mm") : "",
-      images,
+    setLoading(true);
+
+    const auctionData = new FormData();
+    Object.keys(formData).forEach((key) => {
+      auctionData.append(key, formData[key]);
     });
+
+    try {
+      await createAuction(auctionData);
+
+      setFormData({
+        itemName: "",
+        description: "",
+        startingBid: "",
+        startingTime: new Date(),
+        closingTime: new Date(),
+        picture: null,
+      });
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Error creating auction:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,9 +86,11 @@ const AddAuctionPage = () => {
         <label style={{ fontWeight: "bold", fontSize: "14px" }}>Item Name</label>
         <input
           type="text"
+          name="itemName"
           placeholder="Enter item name"
-          value={itemName}
-          onChange={(e) => setItemName(e.target.value)}
+          value={formData.itemName}
+          onChange={handleChange}
+          required
           style={{
             width: "98%",
             padding: "10px",
@@ -59,18 +100,16 @@ const AddAuctionPage = () => {
             fontSize: "14px",
             borderRadius: "5px",
             border: "none",
-            transition: "background-color 0.3s ease"
-                  }} 
-                  onMouseOver={(e) => (e.target.style.backgroundColor = "white")}
-                  onMouseOut={(e) => (e.target.style.backgroundColor = "#c9d1d9")}
-          required
+          }}
         />
 
         <label style={{ fontWeight: "bold", fontSize: "14px" }}>Description</label>
         <textarea
-          value={description}
+          name="description"
           placeholder="Describe the item"
-          onChange={(e) => setDescription(e.target.value)}
+          value={formData.description}
+          onChange={handleChange}
+          required
           style={{
             width: "98%",
             padding: "10px",
@@ -80,19 +119,17 @@ const AddAuctionPage = () => {
             fontSize: "14px",
             borderRadius: "5px",
             border: "none",
-            transition: "background-color 0.3s ease"
-                  }} 
-                  onMouseOver={(e) => (e.target.style.backgroundColor = "white")}
-                  onMouseOut={(e) => (e.target.style.backgroundColor = "#c9d1d9")}
-          required
+          }}
         />
 
         <label style={{ fontWeight: "bold", fontSize: "14px" }}>Starting Price</label>
         <input
           type="number"
+          name="startingBid"
           placeholder="0.00"
-          value={startingPrice}
-          onChange={(e) => setStartingPrice(e.target.value)}
+          value={formData.startingBid}
+          onChange={handleChange}
+          required
           style={{
             width: "98%",
             padding: "10px",
@@ -102,65 +139,27 @@ const AddAuctionPage = () => {
             fontSize: "14px",
             borderRadius: "5px",
             border: "none",
-            transition: "background-color 0.3s ease"
-                  }} 
-                  onMouseOver={(e) => (e.target.style.backgroundColor = "white")}
-                  onMouseOut={(e) => (e.target.style.backgroundColor = "#c9d1d9")}
-          required
+          }}
         />
 
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginTop: "10px", marginBottom: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginBottom: "20px" }}>
           <div style={{ flex: 1 }}>
-            <label style={{ fontWeight: "bold", fontSize: "14px", marginRight: "5px" }}>Start Date and Time</label>
+            <label style={{ fontWeight: "bold", fontSize: "14px" }}>Start Date and Time</label>
             <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
+              selected={formData.startingTime}
+              onChange={handleStartDateChange}
               showTimeSelect
               dateFormat="yyyy-MM-dd HH:mm"
-              placeholderText="Pick a date and time"
-              customInput={
-                <input
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "5px",
-                    backgroundColor: "#c9d1d9",
-                    color: "#0d1117",
-                    fontSize: "14px",
-                    border: "none",
-                    transition: "background-color 0.3s ease"
-                  }} 
-                  onMouseOver={(e) => (e.target.style.backgroundColor = "white")}
-                  onMouseOut={(e) => (e.target.style.backgroundColor = "#c9d1d9")}
-                />
-              }
               required
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={{ fontWeight: "bold", fontSize: "14px", marginRight: "5px" }}>End Date and Time</label>
+            <label style={{ fontWeight: "bold", fontSize: "14px" }}>End Date and Time</label>
             <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
+              selected={formData.closingTime}
+              onChange={handleEndDateChange}
               showTimeSelect
               dateFormat="yyyy-MM-dd HH:mm"
-              placeholderText="Pick a date and time"
-              customInput={
-                <input
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "5px",
-                    backgroundColor: "#c9d1d9",
-                    color: "#0d1117",
-                    fontSize: "14px",
-                    border: "none",
-                    transition: "background-color 0.3s ease"
-                  }} 
-                  onMouseOver={(e) => (e.target.style.backgroundColor = "white")}
-                  onMouseOut={(e) => (e.target.style.backgroundColor = "#c9d1d9")}
-                />
-              }
               required
             />
           </div>
@@ -189,20 +188,11 @@ const AddAuctionPage = () => {
               padding: "20px",
             }}
           >
-            <span style={{ fontSize: "24px", marginBottom: "10px" }}><Upload /></span>
-            <span>Upload <span style={{ color: "black" }}>files</span> one or multiple at a time</span>
-            <span style={{ fontSize: "12px", color: "#0d1117" }}>PNG, JPG, GIF up to 10MB</span>
-            <input
-              id="fileUpload"
-              type="file"
-              multiple
-              onChange={handleFileChange}
-              // style={{ display: "none" }}
-              required
-            />
+            <Upload size={24} />
+            <span>Upload files (PNG, JPG, GIF up to 10MB)</span>
+            <input id="fileUpload" type="file" ref={fileInputRef} onChange={handleFileChange} required />
           </label>
         </div>
-
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
           <button
@@ -217,8 +207,9 @@ const AddAuctionPage = () => {
               cursor: "pointer",
               fontWeight: "bold",
             }}
+            disabled={loading || isCreating}
           >
-            Submit Listing
+            {loading || isCreating ? <Loader2 size={18} className="animate-spin" /> : "Create Auction"}
           </button>
         </div>
       </form>
