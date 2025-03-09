@@ -41,7 +41,9 @@ const AuctionsPage = () => {
   }
 
   return (
-    <div style={{ padding: "16px", paddingTop: "120px" }}>
+    <div style={{ padding: "16px", paddingTop: "100px" }}>
+    <h2 style={{ color: "yellow", textAlign: "center", marginBottom: "30px" }}>Explore Auctions</h2>
+
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "24px" }}>
         {auctions.length > 0 ? (
           auctions.map((auction) => (
